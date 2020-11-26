@@ -1,0 +1,60 @@
+﻿@page "/users"
+
+<div class="d-flex justify-content-between">
+    <div>
+        <h1>Users</h1>
+    </div>
+</div>
+
+<div class="worklog-filter-wrapper">
+    <div class="btn-group" role="group">
+        <button class="btn btn-success" @onclick="@Create">Create</button>
+        <button class="btn btn-primary ml-1" @onclick="@(Refresh)">Refresh</button>
+    </div>
+</div>
+
+@if (Users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="table-wrapper">
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Email Confirmed</th>
+                    <th>Enabled</th>
+                    <th>Last Logged In</th>
+                    <th>Edit</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Users)
+                {
+                    <tr>
+                        <td>@user.Email</td>
+                        <td>
+                            <span class="oi @(user.EmailConfirmed ? "oi oi-check" : "oi oi-x")" aria-hidden="true"></span>
+                        </td>
+                        <td>
+                            <span class="oi @(user.LoginEnabled ? "oi oi-check" : "oi oi-x")" aria-hidden="true"></span>
+                        </td>
+                        <td>@user.LastLoggedInTime.ToLocalTime()</td>
+                        <td><button class="btn btn-warning" @onclick="@(() => Edit(user.Id))">Edit</button></td>
+                        <td class="mobile-view">
+                            <strong>Email: </strong>@user.Email<br />
+                            <strong>Email Confirmed: </strong>@user.EmailConfirmed<br />
+                            <strong>Enabled: </strong>@user.LoginEnabled<br />
+                            <strong>Last Logged In: </strong>@user.LastLoggedInTime.ToLocalTime() <br>
+                            <button class="btn btn-warning" @onclick="@(() => Edit(user.Id))">Edit</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

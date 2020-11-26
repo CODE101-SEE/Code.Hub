@@ -1,0 +1,40 @@
+﻿@page "/zammad"
+
+<div class="d-flex justify-content-between">
+    <div>
+        <h1>DevOps</h1>
+    </div>
+</div>
+
+@if (WorkItems == null || WorkItems.Count == 0)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Organization</th>
+                    <th>Id</th>
+                    <th>Title</th>
+                    <th>Created</th>
+                    <th>Last Updated</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ticket in WorkItems)
+                {
+                    <tr>
+                        <td>@ticket.ProviderOrganization</td>
+                        <td>@ticket.Id</td>
+                        <td>@ticket.Title</td>
+                        <td>@ticket.CreatedDate.ToLocalTime().ToShortDateString()</td>
+                        <td>@ticket.ChangedDate.ToLocalTime().ToShortDateString()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

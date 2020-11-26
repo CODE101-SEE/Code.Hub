@@ -1,0 +1,13 @@
+﻿<div class="row">
+    <div class="col-12">
+        <div class="alert alert-primary">
+            Excel file must follow this guidelines and columns must be filled in this order:  <br />
+            1. User entered as an valid email - must belong to existing user <br />
+            2. Epic is entered as an valid epic name - This epic must exist, but it does not have to be active <br />
+            3. Date in AO format - To check right click on date field in excel, go to format, general and it should be a five digit number <br />
+            4. Time in hh:mm format - (04:30) would be 4 hours and 30 minutes <br />
+            5. Description must have value <br />
+        </div>
+    </div>
+</div>
+<input type="file" id="fileUpload" @onchange="@StartImport" />

@@ -1,0 +1,11 @@
+﻿@page "/"
+<h1>Welcome to Code.Hub!</h1>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        UriHelper.NavigateTo(@"\worklogs");
+        await Task.Yield();
+    }
+
+}

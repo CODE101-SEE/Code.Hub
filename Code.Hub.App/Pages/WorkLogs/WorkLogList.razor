@@ -1,0 +1,135 @@
+﻿@page "/worklogs"
+@using Code.Hub.Shared.WorkProviders
+
+<div class="d-flex justify-content-between">
+    <div>
+        <h1>Work Logs</h1>
+    </div>
+    @if (IsAdmin)
+    {
+        <div>
+            <button class="btn btn-primary" disabled="@RefreshingFromProviders" @onclick="@RefreshFromProviders">Refresh Tasks</button>
+        </div>
+    }
+</div>
+
+<div>
+    <p>Total: @TotalTime | Month: @TotalTimeMonth | Week: @TotalTimeWeek | Today: @TotalTimeDay</p>
+</div>
+
+<div class="worklog-filter-wrapper">
+    <div class="worklog-filter-item">
+        <select id="organization-list" class="form-control" @onchange="@OnUserChanges">
+            <option value="UnAssigned" selected>My Logs!</option>
+
+            @if (IsAdmin)
+            {
+                <option value="AllUsers">All Users!</option>
+
+                @foreach (var user in LoadedUsers)
+                {
+                    <option value=@user.Id>@user.UserName</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="worklog-filter-item">
+        <input @bind-value="WorkLogsInput.SearchStartDate" @bind-value:format="yyyy-MM-dd" type="date" class="form-control" id="dateStarted" placeholder="Date Started" />
+    </div>
+    <div class="worklog-filter-item">
+        <input @bind-value="WorkLogsInput.SearchEndDate" @bind-value:format="yyyy-MM-dd" type="date" class="form-control" id="dateEnded" placeholder="Date Finished" />
+    </div>
+
+    <div class="worklog-filter-item">
+        <select id="organization-list" class="form-control" @onchange="@OnOrganizationChanges">
+            <option value="0" selected>All organizations!</option>
+            @foreach (var org in Organizations)
+            {
+                <option value=@org.Id>@org.Name</option>
+            }
+        </select>
+    </div>
+    <div class="worklog-filter-item">
+        <select id="projects-list" class="form-control" @onchange="@OnProjectChanges">
+            <option value="0" selected="@IsProjectSelected(0)">All projects!</option>
+            @foreach (var project in Projects)
+            {
+                <option value=@project.Id selected="@IsProjectSelected(project.Id)">@project.Name</option>
+            }
+        </select>
+    </div>
+    <div class="worklog-filter-item">
+        <select id="projects-list" class="form-control" @onchange="@OnEpicChanges">
+            <option value="0" selected="@IsEpicSelected(0)">All Epics!</option>
+            @foreach (var epic in Epics)
+            {
+                <option value=@epic.Id selected="@IsEpicSelected(epic.Id)">@epic.Name</option>
+            }
+        </select>
+    </div>
+    <div class="btn-group worklog-filter-item" role="group">
+        <button class="btn btn-secondary" @onclick="@Import">Import</button>
+        <button class="btn btn-info ml-1" @onclick="@Export">Export</button>
+        <button class="btn btn-success ml-1" @onclick="@Create">Create</button>
+        <button class="btn btn-primary ml-1" @onclick="@RefreshWorkLogs">Refresh</button>
+    </div>
+</div>
+
+
+@if (WorkLogs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="table-wrapper">
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Organization</th>
+                    <th>Project</th>
+                    <th>Epic</th>
+                    <th>Status</th>
+                    <th>Task</th>
+                    <th>Hours</th>
+                    <th>Day</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var workLog in WorkLogs)
+                {
+                    <tr>
+                        <td>@GetUserName(workLog.UserId)</td>
+                        <td>@GetWorkLogOrganization(workLog)</td>
+                        <td>@GetWorkLogProject(workLog)</td>
+                        <td>@GetWorkLogEpic(workLog)</td>
+                        <td>@workLog.Status</td>
+                        <td>@(workLog.TaskId == 0 ? "Generic" : workLog.TaskId.ToString())</td>
+                        <td>@DateTimeHelpers.GetFormattedTime(workLog.Hours)</td>
+                        <td>@workLog.DateStarted.ToLocalTime().ToShortDateString()</td>
+
+                        <td><button class="btn btn-warning" @onclick="@(() => Edit(workLog.Id))">Edit</button></td>
+                        <td><button class="btn btn-danger" @onclick="@(() => Delete(workLog))">Delete</button></td>
+
+                        <td class="mobile-view">
+                            <strong>User: </strong>@GetUserName(workLog.UserId)<br />
+                            <strong>Organization: </strong>@GetWorkLogOrganization(workLog) <br />
+                            <strong>Project: </strong>@GetWorkLogProject(workLog) <br />
+                            <strong>Epic: </strong>@GetWorkLogEpic(workLog) <br />
+                            <strong>Status: </strong>@workLog.Status <br />
+                            <strong>Task: </strong>@(workLog.TaskId == 0 ? "Generic" : workLog.TaskId.ToString())<br />
+                            <strong>Hours: </strong>@DateTimeHelpers.GetFormattedTime(workLog.Hours) <br />
+                            <strong>Date Started: </strong>@workLog.DateStarted.ToLocalTime().ToShortDateString()<br />
+                            <button class="btn btn-warning" @onclick="@(() => Edit(workLog.Id))">Edit</button>
+                            <button class="btn btn-danger" @onclick="@(() => Delete(workLog))">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

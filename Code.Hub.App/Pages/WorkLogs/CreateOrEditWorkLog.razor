@@ -1,0 +1,204 @@
+﻿@using Code.Hub.Shared.WorkProviders
+@if (Entity == null)
+{
+    <div><em>Loading...</em></div>
+}
+else
+{
+    <EditForm Model="@Entity" OnValidSubmit="@SubmitForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="simple-form">
+
+            @if (CodeHubMode)
+            {
+                <div class="row legacy-mode">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="organization-list">Organization</label>
+                            <select id="organization-list" class="form-control" @onchange="@OnOrganizationChange">
+                                @if (SelectedOrganization.Id == 0)
+                                {
+                                    <option value="0" selected>Pick an organization!</option>
+                                }
+                                @foreach (var org in Organizations)
+                                {
+                                    <option value=@org.Id selected="@IsOrganizationSelected(org.Id)">@org.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="projects-list">Project</label>
+                            <select id="projects-list" class="form-control" @onchange="@OnProjectChanges">
+                                @if (SelectedOrganization.Id == 0)
+                                {
+                                    <option value="0" selected>Pick an organization!</option>
+                                }
+                                else if (SelectedProject.Id == 0)
+                                {
+                                    <option value="0" selected>Pick an project!</option>
+                                }
+                                @foreach (var project in SelectedOrganization.Projects.ToList())
+                                {
+                                    <option value=@project.Id selected="@IsProjectSelected(project.Id)">@project.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="epic-list">Epic</label>
+                            <select id="epic-list" class="form-control" @bind="@Entity.EpicId">
+                                @if (SelectedOrganization.Id == 0)
+                                {
+                                    <option value="0" disabled>Pick an organization!</option>
+                                }
+                                else if (SelectedProject.Id == 0)
+                                {
+                                    <option value="0" selected>Pick an project!</option>
+                                }
+                                else if (Entity.EpicId == 0)
+                                {
+                                    <option value="0" selected>Pick an epic!</option>
+                                }
+                                @foreach (var epic in SelectedProject.Epics.ToList())
+                                {
+                                    <option value=@epic.Id selected="@IsEpicSelected(epic.Id)">@epic.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="task-row d-flex justify-content-between align-items-center">
+                <div class="task-container form-group">
+                    <label for="taskId">Task</label>
+                    <BlazoredTypeahead id="taskId" placeholder="Choose Task" MaximumSuggestions="50" SearchMethod="SearchWorkItems" @bind-Value="SelectedTask" EnableDropDown="true">
+                        <SelectedTemplate Context="item">
+                            @if (item.ProviderType == StaticWorkProviderTypes.DevOps)
+                                {
+                                <div style="color: @item.Color;" class="@GetWorkItemClass(item)">
+                                    <span style="width: 5%;">@item.Id</span>
+                                    <span style="width: 34%;">@StringHelpers.GetTextSummary(item.Title, 40)</span>
+                                    <span style="width: 20%;">@item.Parent.Title</span>
+                                    <span style="width: 20%;">@item.Parent.Parent.Title</span>
+                                    <span style="width: 20%;">@item.Project</span>
+                                </div>
+                                }
+                                else if (item.ProviderType == StaticWorkProviderTypes.CodeHub)
+                                {
+                                <div>
+                                    <span style="width: 95%;">@item.Title</span>
+                                </div>
+                                }
+                                else if (item.ProviderType == StaticWorkProviderTypes.Zammad)
+                                {
+                                <div style="color: @item.Color;" class="d-flex @GetWorkItemClass(item)">
+                                    <span style="width: 5%;">@item.Id</span>
+                                    <span style="width: 94%;">@item.Title</span>
+                                </div>
+                                }
+                        </SelectedTemplate>
+                        <ResultTemplate Context="item">
+                            @if (item.ProviderType == StaticWorkProviderTypes.DevOps)
+                                {
+                                <div style="color: @item.Color;" class="d-flex @GetWorkItemClass(item)">
+                                    <span style="width: 5%;">@item.Id</span>
+                                    <span style="width: 34%;">@StringHelpers.GetTextSummary(item.Title, 40)</span>
+                                    <span style="width: 20%;">@item.Parent.Title</span>
+                                    <span style="width: 20%;">@item.Parent.Parent.Title</span>
+                                    <span style="width: 20%;">@item.Project</span>
+                                </div>
+                                }
+                                else if (item.ProviderType == StaticWorkProviderTypes.CodeHub)
+                                {
+                                <div>
+                                    <span style="width: 95%;">@item.Title</span>
+                                </div>
+                                }
+                                else if (item.ProviderType == StaticWorkProviderTypes.Zammad)
+                                {
+                                <div style="color: @item.Color;" class="@GetWorkItemClass(item)">
+                                    <span style="width: 5%;">@item.Id</span>
+                                    <span style="width: 94%;">@item.Title</span>
+                                </div>
+                                }
+                        </ResultTemplate>
+                    </BlazoredTypeahead>
+                </div>
+                <div class="provider-switcher">
+                    <button class="btn btn-primary" type="button" @onclick="@(SwitchMode)">Switch</button>
+                </div>
+            </div>
+
+            @if (Entity.Id > 0 && Entity.ProviderType != StaticWorkProviderTypes.CodeHub && SelectedTask == null)
+            {
+                <div class="col-md-12">
+                    <div class="alert alert-danger" role="alert">
+                        Item @Entity.TaskId no longer exists on @Entity.ProviderType (Organization ID: @Entity.OrganizationId)
+                    </div>
+                </div>
+            }
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <InputTextArea @bind-Value="Entity.Description" class="form-control" id="description" placeholder="Description. Mostly used for legacy data" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="hours">Hours (hh:mm)</label>
+                        <input @bind-value="WorkedDateHelper" type="text" required class="form-control" id="hours" placeholder="Hours" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <label for="dateWorked">Date Worked</label>
+                            <input @bind-value="@Entity.DateStarted" type="date" class="form-control" id="dateWorked" placeholder="Date Worked" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="status-list">Status</label>
+                        <select id="status-list" class="form-control" @bind="@Entity.Status">
+                            @foreach (var status in Enum.GetValues(typeof(WorkLogStatus)))
+                            {
+                                <option>@status</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                @if (InvalidHours)
+                {
+                    <div class="col-md-12">
+                        <div class="alert alert-danger" role="alert">
+                            You have to enter time in hh:mm format, where hours cannot be larger than @DateTimeHelpers.MaxAllowedHours and allowed minutes are: @(string.Join(", ", DateTimeHelpers.AllowedMinutes)).
+                            Examples: 03:30, 2:15, 3, 12:45
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (!string.IsNullOrEmpty(ExceptionMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    Exception: @ExceptionMessage
+                </div>
+            }
+            <button type="submit" disabled="@IsDisabled()" class="btn btn-primary">Submit</button>
+            <button @onclick="@Cancel" type="button" class="btn btn-secondary">Cancel</button>
+        </div>
+    </EditForm>
+}

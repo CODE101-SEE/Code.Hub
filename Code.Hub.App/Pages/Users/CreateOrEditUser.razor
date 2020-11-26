@@ -1,0 +1,68 @@
+﻿@if (Input == null)
+{
+    <div><em>Loading...</em></div>
+}
+else
+{
+    <EditForm autocomplete="off" Model="@Input" OnValidSubmit="@SubmitForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="simple-form">
+            <div class="form-group">
+                <label for="devOpsName">Name</label>
+                <input autocomplete="off" @bind="Input.Email" type="text" class="form-control" id="devOpsName" placeholder="Name" />
+            </div>
+
+
+            <div class="form-group">
+                <label for="comment">Comments</label>
+                <textarea autocomplete="off" @bind="Input.Comment" type="text" class="form-control" id="comment" placeholder="Additional Comments"></textarea>
+            </div>
+
+
+            @if (IsEdit)
+            {
+                <div class="form-group">
+                    <p>Last logged in time: @Input.LastLoggedInTime</p>
+                </div>
+
+                <div class="form-group">
+                    <input type="checkbox" id="password-change" @bind="Input.RequestPasswordChange" />
+                    <label for="password-change">Change Password</label>
+                </div>
+            }
+
+            @if (!IsEdit || Input.RequestPasswordChange)
+            {
+                <div class="form-group">
+                    <label for="devOpsPassword">Password</label>
+                    <input autocomplete="off" @bind="Input.Password" type="password" class="form-control" id="devOpsPassword" placeholder="Password" />
+                </div>
+
+                <div class="form-group">
+                    <label for="devOpsConfirmPassword">Confirm Password</label>
+                    <input autocomplete="off" @bind="Input.ConfirmPassword" type="password" class="form-control" id="devOpsConfirmPassword" placeholder="Confirm Password" />
+                </div>
+            }
+
+            <div class="form-group">
+                <input autocomplete="off" type="checkbox" id="enable-login" @bind="Input.LoginEnabled" />
+                <label for="enable-login">Enable Login</label>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(UnknownException))
+            {
+                <div class="col-md-12">
+                    <div class="alert alert-danger" role="alert">
+                        <div>Something went wrong @UnknownException</div>
+                    </div>
+                </div>
+            }
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <button @onclick="@Cancel" type="button" class="btn btn-secondary">Cancel</button>
+        </div>
+    </EditForm>
+
+}

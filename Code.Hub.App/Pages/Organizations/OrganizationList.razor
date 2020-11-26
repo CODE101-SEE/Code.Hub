@@ -1,0 +1,57 @@
+﻿@page "/organizations"
+
+<div class="d-flex justify-content-between">
+    <div>
+        <h1>Organizations</h1>
+    </div>
+</div>
+
+<div class="worklog-filter-wrapper">
+    <div class="btn-group worklog-filter-item" role="group">
+        <button class="btn btn-success" @onclick="@(Create)">Create</button>
+        <button class="btn btn-primary ml-1" @onclick="@(Refresh)">Refresh</button>
+    </div>
+</div>
+
+
+@if (Organizations == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Url</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var org in Organizations)
+                {
+                    <tr style="color: @org.Color">
+                        <td>@org.Name</td>
+                        <td>@org.ProviderType</td>
+                        <td><a class="oi oi-external-link" href="@org.Url" target="_blank"></a></td>
+                        <td><button class="btn btn-warning" @onclick="@(() => Edit(org.Id))">Edit</button></td>
+                        <td><button class="btn btn-danger" @onclick="@(() => Delete(org))">Delete</button></td>
+
+                        <td class="mobile-view">
+                            <strong>Name: </strong>@org.Name <br>
+                            <strong>Type: </strong>@org.ProviderType<br>
+                            <strong>Url: </strong><a class="oi oi-external-link" href="@org.Url" target="_blank"></a> <br>
+
+                            <button class="btn btn-warning" @onclick="@(() => Edit(org.Id))">Edit</button>
+                            <button class="btn btn-danger" @onclick="@(() => Delete(org))">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

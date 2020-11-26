@@ -1,0 +1,49 @@
+﻿@using System.IO
+@using System.Text
+@using System.Text.Json
+@using System.Net.Http
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity;
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+@using Code.Hub.App.Pages
+@using Code.Hub.App.Areas
+@using Code.Hub.App.Pages.Modal
+@using Code.Hub.Core.Services
+@using Code.Hub.App.Pages.Modal.ModalTemplates
+@using Code.Hub.App.Pages.Toast
+@using Code.Hub.Shared
+@using Code.Hub.Shared.Models
+@using OfficeOpenXml
+@using Code.Hub.Shared.Dtos.Inputs
+@using Code.Hub.Core.Services.Epics
+@using Code.Hub.Core.Services.Organizations
+@using Code.Hub.Core.Services.Projects
+@using Code.Hub.Core.Services.Users
+@using Code.Hub.Core.Services.WorkLogs
+@using Code.Hub.App.Extensions
+@using Code.Hub.Shared.Extensions
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Code.Hub
+@using Blazored.Typeahead
+@using Code.Hub.Core.WorkProviders.DevOps
+@using Code.Hub.Core.WorkProviders.Zammad
+
+@inject IModalService Modal
+@inject IToastService ToastService
+
+@inject IProjectsService ProjectsService
+@inject IOrganizationsService OrganizationsService
+@inject IEpicsService EpicsService
+@inject IWorkLogsService WorkLogsService
+@inject IUserService UserService
+
+@inject IJSRuntime JsInterop
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager UriHelper
+@inject IDevOpsManager DevOpsManager
+@inject IZammadManager ZammadManager

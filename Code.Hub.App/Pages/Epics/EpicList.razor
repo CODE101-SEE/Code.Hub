@@ -1,0 +1,78 @@
+﻿@page "/epics"
+
+<div class="d-flex justify-content-between">
+    <div>
+        <h1>Epics</h1>
+    </div>
+</div>
+
+<div class="worklog-filter-wrapper">
+    <div class="worklog-filter-item">
+        <select id="organization-list" class="form-control" @onchange="@OnOrganizationChanges">
+            <option value="0" selected>All organizations</option>
+            @foreach (var org in Organizations)
+            {
+                <option value=@org.Id>@org.Name</option>
+            }
+        </select>
+    </div>
+    <div class="worklog-filter-item">
+        <select id="projects-list" class="form-control" @onchange="@TriggerProjectChanges">
+            <option value="0" selected="@IsProjectSelected(0)">All projects</option>
+            @foreach (var project in Projects)
+            {
+                <option value=@project.Id selected="@IsProjectSelected(project.Id)">@project.Name</option>
+            }
+        </select>
+    </div>
+
+    <div class="btn-group worklog-filter-item" role="group">
+        <button class="btn btn-success" @onclick="@Create">Create</button>
+        <button class="btn btn-primary ml-1" @onclick="@Refresh">Refresh</button>
+    </div>
+</div>
+
+
+@if (Epics == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Organization</th>
+                    <th>Project</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var epic in Epics)
+                {
+                    <tr>
+                        <td>@epic.Project.Organization.Name</td>
+                        <td>@epic.Project.Name</td>
+                        <td>@epic.Name</td>
+                        <td>@(StringHelpers.GetTextSummary(epic.Description, 30))</td>
+                        <td><button class="btn btn-warning" @onclick="@(() => Edit(epic.Id))">Edit</button></td>
+                        <td><button class="btn btn-danger" @onclick="@(() => Delete(epic))">Delete</button></td>
+
+                        <td class="mobile-view">
+                            <strong>Organization: </strong>@epic.Project.Organization.Name<br />
+                            <strong>Project: </strong>@epic.Project.Name<br />
+                            <strong>Name: </strong>@epic.Name<br />
+                            <strong>Description: </strong>@(StringHelpers.GetTextSummary(epic.Description, 25)) <br>
+                            <button class="btn btn-warning" @onclick="@(() => Edit(epic.Id))">Edit</button>
+                            <button class="btn btn-danger" @onclick="@(() => Delete(epic))">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

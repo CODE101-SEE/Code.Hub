@@ -1,0 +1,42 @@
+﻿@inherits LayoutComponentBase
+<!-- Modal should be at root in order for it to be properly shown-->
+<div class="page">
+
+    <Code.Hub.App.Pages.Modal.BaseModal />
+    <Code.Hub.App.Pages.Toast.BaseToast />
+
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <div class="main">
+        <div class="top-row px-4">
+            <LoginDisplay />
+        </div>
+
+        <div class="content px-4">
+            <AuthorizeView>
+                <Authorized>
+                    @Body
+                </Authorized>
+                <NotAuthorized>
+                    <p>You lack permissions to view this page. You have to login first.</p>
+                    <p>If you do not have an account you have to contact Administrator to create one for you.</p>
+                    <p>If you are logged in and need to see this page, ask administrator change your role!</p>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </div>
+</div>
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            UriHelper.NavigateTo(@"/Identity/Account/Login", true);
+        }
+    }
+}

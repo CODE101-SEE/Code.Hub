@@ -1,0 +1,63 @@
+﻿@if (@EpicEntity == null)
+{
+    <div><em>Loading...</em></div>
+}
+else
+{
+    <EditForm Model="@EpicEntity" OnValidSubmit="@SubmitForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="simple-form">
+            <div class="form-group">
+                <label for="organization-list">Organization</label>
+                <select id="organization-list" class="form-control" @onchange="@TriggerSelectOrganization">
+                    @if (@SelectedOrganization.Id == 0)
+                    {
+                        <option value="0" selected>Pick an organization!</option>
+                    }
+                    @foreach (var org in @Organizations)
+                    {
+                        <option value=@org.Id selected="@IsOrganizationSelected(org.Id)">@org.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="organization-list">Project</label>
+                <select id="organization-list" class="form-control" @bind="@EpicEntity.ProjectId">
+                    @if (SelectedOrganization.Id == 0)
+                    {
+                        <option value="0" disabled>Pick an organization</option>
+                    }
+                    else if (@EpicEntity.ProjectId == 0)
+                    {
+                        <option value="0" selected>Pick an project</option>
+                    }
+                    @foreach (var project in @Projects)
+                    {
+                        <option value=@project.Id>@project.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input @bind="@EpicEntity.Name" type="text" class="form-control" id="name" placeholder="Name" />
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <InputTextArea @bind-Value="@EpicEntity.Description" class="form-control" id="description" placeholder="Description" />
+            </div>
+
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="isDisabled" @bind="EpicEntity.IsDisabled">
+                <label class="form-check-label" for="isDisabled">Disabled</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <button @onclick="Cancel" type="button" class="btn btn-secondary">Cancel</button>
+        </div>
+    </EditForm>
+}

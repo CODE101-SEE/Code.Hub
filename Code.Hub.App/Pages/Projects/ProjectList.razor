@@ -1,0 +1,65 @@
+﻿@page "/projects"
+
+<div class="d-flex justify-content-between">
+    <div>
+        <h1>Projects</h1>
+    </div>
+</div>
+
+<div class="worklog-filter-wrapper">
+    <div class="worklog-filter-item">
+        <select id="organization-list" class="form-control" @onchange="@OnOrganizationChange">
+            <option value="0" selected>All organizations!</option>
+            @foreach (var org in Organizations)
+            {
+                <option value=@org.Id>@org.Name</option>
+            }
+        </select>
+    </div>
+
+    <div class="btn-group worklog-filter-item" role="group">
+        <button class="btn btn-success" @onclick="@(() => Create(0))">Create</button>
+        <button class="btn btn-primary ml-1" @onclick="@(Refresh)">Refresh</button>
+    </div>
+</div>
+
+@if (Projects == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="table-wrapper">
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Organization</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var project in Projects)
+                {
+                    <tr>
+                        <td>@project.Organization.Name</td>
+                        <td>@project.Name</td>
+                        <td>@(StringHelpers.GetTextSummary(project.Description, 50))</td>
+                        <td><button class="btn btn-warning" @onclick="@(() => Edit(project.Id))">Edit</button></td>
+                        <td><button class="btn btn-danger" @onclick="@(() => Delete(project))">Delete</button></td>
+                        <td class="mobile-view">
+                            <strong>Organization: </strong>@project.Organization.Name<br />
+                            <strong>Name: </strong>@project.Name<br />
+                            <strong>Description: </strong>@(StringHelpers.GetTextSummary(project.Description, 30)) <br>
+                            <button class="btn btn-warning" @onclick="@(() => Edit(project.Id))">Edit</button>
+                            <button class="btn btn-danger" @onclick="@(() => Delete(project))">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

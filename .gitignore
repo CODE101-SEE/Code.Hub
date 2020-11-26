@@ -1,0 +1,9 @@
+Code.Hub.App/bin/
+Code.Hub.App/obj/
+Code.Hub.Core/bin/
+Code.Hub.Core/obj/
+Code.Hub.EFCoreData/bin/
+Code.Hub.EFCoreData/obj/
+Code.Hub.Shared/bin/
+Code.Hub.Shared/obj/
+.vs/

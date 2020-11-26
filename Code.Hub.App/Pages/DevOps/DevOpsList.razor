@@ -1,0 +1,46 @@
+﻿@page "/devOps"
+
+<div class="d-flex justify-content-between">
+    <div>
+        <h1>DevOps</h1>
+    </div>
+    @if (IsAdmin)
+    {
+        <div>
+            <button class="btn btn-secondary" disabled="@ProcessingDevOpsFix" @onclick="@FixDevOpsIds">Fix DevOps Ids</button>
+        </div>
+    }
+</div>
+
+@if (TreeNodes == null || TreeNodes.Count == 0)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Organization</th>
+                    <th>Project</th>
+                    <th>Epic</th>
+                    <th>Feature</th>
+                    <th>Hours</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var feature in TreeNodes)
+                {
+                    <tr>
+                        <td>@feature.ProviderOrganization</td>
+                        <td>@feature.Project</td>
+                        <td>@feature.Parent.Title</td>
+                        <td>@feature.Title</td>
+                        <td>@DateTimeHelpers.GetFormattedTime(feature.HoursWorked)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

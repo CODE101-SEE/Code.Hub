@@ -1,0 +1,61 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+	  <TargetFramework>net5.0</TargetFramework>
+	<UserSecretsId>1d5838ac-39f4-41f8-9041-270383733cd3</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Blazored.Typeahead" Version="4.4.1" />
+	<PackageReference Include="log4net" Version="2.0.12" />
+	<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="5.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="5.0.0" />
+	<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.0" />
+	<PackageReference Include="SendGrid" Version="9.21.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<Folder Include="wwwroot\images\" />
+	<Folder Include="wwwroot\lib\bootstrap\" />
+	<Folder Include="wwwroot\lib\bootstrap\dist\css\" />
+	<Folder Include="wwwroot\lib\bootstrap\dist\js\" />
+	<Folder Include="wwwroot\lib\jquery-validation-unobtrusive\" />
+	<Folder Include="wwwroot\lib\jquery-validation\" />
+	<Folder Include="wwwroot\lib\jquery-validation\dist\" />
+	<Folder Include="wwwroot\lib\jquery\" />
+	<Folder Include="wwwroot\lib\jquery\dist\" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<None Include="wwwroot\lib\jquery\dist\jquery.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<ProjectReference Include="..\Code.Hub.Core\Code.Hub.Core.csproj" />
+	<ProjectReference Include="..\Code.Hub.EFCoreData\Code.Hub.EFCoreData.csproj" />
+	<ProjectReference Include="..\Code.Hub.Shared\Code.Hub.Shared.csproj" />
+  </ItemGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>full</DebugType>
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<EnvironmentName>Development</EnvironmentName>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+		<DebugType>pdbonly</DebugType>
+		<Optimize>true</Optimize>
+		<EnvironmentName>Production</EnvironmentName>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Content Remove="appsettings.json" />
+		<Content Remove="appsettings.*.json" />
+		<Content Include="appsettings.json" CopyToOutputDirectory="Always" />
+		<Content Include="appsettings.*.json" Exclude="appsettings.$(EnvironmentName).json" DependentUpon="appsettings.json" CopyToOutputDirectory="Never" />
+		<Content Include="appsettings.$(EnvironmentName).json" DependentUpon="appsettings.json" CopyToOutputDirectory="Always" />
+		<Content Update="log4net.config" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
+</Project>
