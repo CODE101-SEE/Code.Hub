@@ -52,7 +52,7 @@ namespace Code.Hub.Core.WorkProviders.DevOps
             var workProviders = await _organizationsService.GetWorkProviderOrganizations();
 
             var allWorkItems = new CodeHubWorkItemList { WorkItems = new List<CodeHubWorkItem>() };
-            foreach (var organization in workProviders.Where(organization => organization.ProviderType == StaticWorkProviderTypes.DevOps))
+            foreach (var organization in workProviders.Where(organization => organization.ProviderType == WorkProviderType.DevOps))
                 allWorkItems.WorkItems.AddRange(await GetDevOpsItems(organization, clearCache));
 
             return allWorkItems;

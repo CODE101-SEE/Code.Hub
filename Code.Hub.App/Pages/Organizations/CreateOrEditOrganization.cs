@@ -1,4 +1,6 @@
-﻿using Code.Hub.App.Pages.Modal;
+﻿using System;
+using System.Collections.Immutable;
+using Code.Hub.App.Pages.Modal;
 using Code.Hub.Shared.Models;
 using Code.Hub.Shared.WorkProviders;
 using Microsoft.AspNetCore.Components;
@@ -12,9 +14,9 @@ namespace Code.Hub.App.Pages.Organizations
 
         public Organization OrganizationInfo { get; set; } = new Organization();
         // Add only after support was tested completely 
-        public string[] AvailableOrganizationTypes = { StaticWorkProviderTypes.CodeHub, StaticWorkProviderTypes.DevOps, StaticWorkProviderTypes.Zammad };
+        public static readonly ImmutableArray<WorkProviderType> AvailableOrganizationTypes = Enum.GetValues<WorkProviderType>().ToImmutableArray();
 
-        public bool IsProviderSelected(string type) => OrganizationInfo.ProviderType == type;
+        public bool IsProviderSelected(WorkProviderType type) => OrganizationInfo.ProviderType == type;
 
         protected override void OnInitialized()
         {

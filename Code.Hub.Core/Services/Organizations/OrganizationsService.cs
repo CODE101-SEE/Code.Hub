@@ -28,7 +28,7 @@ namespace Code.Hub.Core.Services.Organizations
         public async Task<List<Organization>> GetWorkProviderOrganizations()
         {
             return await _context.Organizations.OrderBy(s => s.Name)
-                .Where(s => !string.IsNullOrEmpty(s.ProviderType) && !s.ProviderType.Equals(StaticWorkProviderTypes.CodeHub)
+                .Where(s => s.ProviderType != WorkProviderType.CodeHub
                         && !string.IsNullOrEmpty(s.Color) && !string.IsNullOrEmpty(s.AuthToken) && !string.IsNullOrEmpty(s.Url))
                 .ToListAsync();
         }
@@ -37,15 +37,11 @@ namespace Code.Hub.Core.Services.Organizations
         {
             var organization = await _context.Organizations.FindAsync(id) ??
                                new Organization { Name = "", Description = "", Projects = new List<Project>() };
-
-            organization.ProviderType = string.IsNullOrWhiteSpace(organization.ProviderType) ? StaticWorkProviderTypes.CodeHub : organization.ProviderType;
-
             return organization;
         }
 
         public async Task<Organization> CreateOrEditOrganization(Organization organization)
         {
-            if (string.IsNullOrEmpty(organization.ProviderType)) throw new Exception("Provider type is required!");
             return (organization.Id != 0) ? await UpdateOrganization(organization) : await CreateOrganization(organization);
         }
 

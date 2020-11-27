@@ -30,7 +30,7 @@ else
                 </select>
             </div>
 
-            @if (OrganizationInfo.ProviderType == StaticWorkProviderTypes.DevOps || OrganizationInfo.ProviderType == StaticWorkProviderTypes.Zammad)
+            @if (OrganizationInfo.ProviderType == WorkProviderType.DevOps || OrganizationInfo.ProviderType == WorkProviderType.Zammad)
             {
                 <div class="form-group">
                     <label for="url">AuthToken</label>

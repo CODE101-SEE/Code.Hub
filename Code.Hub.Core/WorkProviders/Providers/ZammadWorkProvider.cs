@@ -1,27 +1,27 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
 using Code.Hub.Core.Caches;
 using Code.Hub.Core.Services.Organizations;
 using Code.Hub.Shared.Models;
 using Code.Hub.Shared.WorkProviders;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Zammad.Client;
 using Zammad.Client.Core;
 
-namespace Code.Hub.Core.WorkProviders.Zammad
+namespace Code.Hub.Core.WorkProviders.Providers
 {
-    public class ZammadManager : IZammadManager
+    public class ZammadWorkProvider : IWorkProvider, IWorkCacheProvider
     {
         private readonly IMapper _mapper;
-        private readonly ILogger<ZammadManager> _logger;
+        private readonly ILogger<ZammadWorkProvider> _logger;
         private readonly ICodeHubCache _codeHubCache;
         private readonly IOrganizationsService _organizationsService;
 
-        public ZammadManager(IMapper mapper, ILogger<ZammadManager> logger, ICodeHubCache codeHubCache, IOrganizationsService organizationsService)
+        public ZammadWorkProvider(ILogger<ZammadWorkProvider> logger, IMapper mapper, ICodeHubCache codeHubCache, IOrganizationsService organizationsService)
         {
             _mapper = mapper;
             _logger = logger;
@@ -29,21 +29,16 @@ namespace Code.Hub.Core.WorkProviders.Zammad
             _organizationsService = organizationsService;
         }
 
-        private ZammadAccount CreateConnectionFromConfiguration(Organization organization)
-        {
-            return new ZammadAccount(new Uri(organization.Url), ZammadAuthentication.Token, string.Empty, string.Empty, organization.AuthToken);
-        }
-
-        public async Task<CodeHubWorkItemList> GetAllWorkItemsFromCache(bool clearCache)
+        public async Task<CodeHubWorkItemList> GetAllWorkItems()
         {
             try
             {
-                var workProviders = await _organizationsService.GetWorkProviderOrganizations();
-
                 var allWorkItems = new CodeHubWorkItemList { WorkItems = new List<CodeHubWorkItem>() };
 
-                foreach (var organization in workProviders.Where(organization => organization.ProviderType == WorkProviderType.Zammad))
-                    allWorkItems.WorkItems.AddRange(await GetZammadItems(organization, clearCache));
+                foreach (var organization in await GetProviderOrganizationsAsync())
+                {
+                    allWorkItems.WorkItems.AddRange((await GetWorkItems(organization)).WorkItems);
+                }
 
                 allWorkItems.WorkItems = allWorkItems.WorkItems.OrderByDescending(s => s.ChangedDate).ToList();
                 return allWorkItems;
@@ -55,9 +50,28 @@ namespace Code.Hub.Core.WorkProviders.Zammad
             }
         }
 
-        public async Task<List<CodeHubWorkItem>> GetZammadItems(Organization organization, bool clearCache)
+        public async Task<CodeHubWorkItemList> GetWorkItems(Organization organization)
         {
-            var devOpsWorkItems = await GetAllWorkItemsFromProviderFromCache(organization, clearCache);
+            return new CodeHubWorkItemList { WorkItems = await GetZammadItems(organization) };
+        }
+
+        public async ValueTask InvalidateAllCacheAsync()
+        {
+            foreach (var organization in await GetProviderOrganizationsAsync())
+            {
+                await InvalidateCacheAsync(organization);
+            }
+        }
+
+        public ValueTask InvalidateCacheAsync(Organization organization)
+        { 
+            _codeHubCache.Cache.Remove(CreateCacheKey(organization));
+            return ValueTask.CompletedTask;
+        }
+
+        public async Task<List<CodeHubWorkItem>> GetZammadItems(Organization organization)
+        {
+            var devOpsWorkItems = await GetAllWorkItemsFromProviderFromCache(organization);
 
             foreach (var workItem in devOpsWorkItems.WorkItems)
             {
@@ -68,16 +82,12 @@ namespace Code.Hub.Core.WorkProviders.Zammad
                 workItem.Parent = FillParentProperties(workItem);
             }
 
-            return devOpsWorkItems.WorkItems;
+            return devOpsWorkItems.WorkItems.OrderBy(p=> p.ChangedDate).ToList();
         }
 
-        private async Task<CodeHubWorkItemList> GetAllWorkItemsFromProviderFromCache(Organization organization, bool clearCache)
+        private async Task<CodeHubWorkItemList> GetAllWorkItemsFromProviderFromCache(Organization organization)
         {
-            var cacheKey = $"ZammadWorkItemsFromProvider{organization.Url}";
-            if (clearCache)
-                _codeHubCache.Cache.Remove(cacheKey);
-
-            var workItems = await _codeHubCache.Cache.GetOrCreateAsync(cacheKey, async entry =>
+            var workItems = await _codeHubCache.Cache.GetOrCreateAsync(CreateCacheKey(organization), async entry =>
             {
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(organization.CacheDurationSeconds > 0 ? organization.CacheDurationSeconds : 60 * 60 * 24);
                 return await GetAllWorkItemsFromProvider(organization);
@@ -86,11 +96,16 @@ namespace Code.Hub.Core.WorkProviders.Zammad
             return workItems;
         }
 
+        private ZammadAccount CreateConnection(Organization organization)
+        {
+            return new ZammadAccount(new Uri(organization.Url), ZammadAuthentication.Token, string.Empty, string.Empty, organization.AuthToken);
+        }
+
         private async Task<CodeHubWorkItemList> GetAllWorkItemsFromProvider(Organization organization)
         {
             try
             {
-                var connection = CreateConnectionFromConfiguration(organization);
+                var connection = CreateConnection(organization);
                 var client = connection.CreateTicketClient();
                 var tickets = await client.GetTicketListAsync();
                 var ticketList = tickets.ToList();
@@ -124,6 +139,17 @@ namespace Code.Hub.Core.WorkProviders.Zammad
             workItem.Parent.OrganizationId = workItem.Id;
 
             return workItem.Parent;
+        }
+
+        private async Task<IEnumerable<Organization>> GetProviderOrganizationsAsync()
+        {
+            var workProviders = await _organizationsService.GetWorkProviderOrganizations();
+            return workProviders.Where(p => p.ProviderType == WorkProviderType.Zammad && !p.IsDisabled);
+        }
+
+        private string CreateCacheKey(Organization organization)
+        {
+            return $"ZammadWorkItemsFromProvider{organization.Url}";
         }
     }
 }
